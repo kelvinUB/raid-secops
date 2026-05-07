@@ -4,9 +4,7 @@ import { useApp } from '../context/AppContext'
 import type { UserRole } from '../types'
 import { cn } from '../lib/utils'
 
-// ── API base URL ─────────────────────────────────────────────
-// In dev Vite proxies /api → FastAPI. In prod set VITE_API_URL in .env
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_URL ?? 'https://raid-secops-backend.onrender.com'
 
 interface RoleCard {
   key: UserRole
@@ -58,7 +56,6 @@ export default function LoginPage() {
   const { setRole } = useApp()
   const navigate    = useNavigate()
 
-  // Step 1 → Step 2
   const handleRoleNext = () => {
     if (!selected) return
     setError('')
@@ -67,13 +64,11 @@ export default function LoginPage() {
     setStep('credentials')
   }
 
-  // Step 2 → back
   const handleBack = () => {
     setStep('role')
     setError('')
   }
 
-  // Final sign-in — calls FastAPI
   const handleSignIn = async () => {
     if (!selected) return
     setError('')
@@ -98,24 +93,18 @@ export default function LoginPage() {
 
       if (res.ok) {
         const data = await res.json()
-
-        // Store JWT in sessionStorage so other pages can use it
         sessionStorage.setItem('raid_token', data.access_token)
         sessionStorage.setItem('raid_user',  JSON.stringify(data.user))
-
-        // Set role in app context and navigate
         setRole(selected)
         const card = ROLE_CARDS.find((c) => c.key === selected)
         navigate(card?.defaultPage ?? '/dashboard')
       } else {
-        // FastAPI returns { detail: "..." } on 401/422
         const err = await res.json().catch(() => ({}))
         setError(err.detail ?? 'Invalid username, password, or role.')
         setLoading(false)
       }
     } catch {
-      // Network error — FastAPI not running
-      setError('Cannot reach the server. Make sure the FastAPI backend is running on port 8000.')
+      setError('Cannot reach the server. Please try again in a moment.')
       setLoading(false)
     }
   }
@@ -135,7 +124,6 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-[680px]">
 
-        {/* Brand */}
         <div className="text-center mb-10">
           <div
             className="w-14 h-14 bg-[#3b82f6] rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold"
@@ -149,7 +137,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* ── STEP 1: Role Selection ── */}
         {step === 'role' && (
           <>
             <div className="flex items-center justify-center gap-2 mb-7">
@@ -201,7 +188,6 @@ export default function LoginPage() {
           </>
         )}
 
-        {/* ── STEP 2: Credentials ── */}
         {step === 'credentials' && selectedCard && (
           <>
             <div className="flex items-center justify-center gap-2 mb-7">
@@ -216,7 +202,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Role summary pill */}
             <div className="flex items-center gap-3 bg-white/[0.05] border border-white/10 rounded-xl px-4 py-3 mb-5">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[15px] shrink-0"
@@ -233,13 +218,11 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Form */}
             <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 mb-4">
               <h2 className="text-[13px] font-semibold text-white mb-5">
                 Sign in as {selectedCard.label}
               </h2>
 
-              {/* Username */}
               <div className="mb-4">
                 <label className="block text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1.5">
                   Username
@@ -256,7 +239,6 @@ export default function LoginPage() {
                 />
               </div>
 
-              {/* Password */}
               <div className="mb-5">
                 <label className="block text-[10px] font-medium text-white/40 uppercase tracking-wider mb-1.5">
                   Password
@@ -282,7 +264,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Error */}
               {error && (
                 <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/25 rounded-lg px-3.5 py-2.5 mb-4">
                   <span className="text-red-400 text-[13px] leading-none shrink-0">⚠</span>
@@ -290,7 +271,6 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* Sign in button */}
               <button
                 onClick={() => void handleSignIn()}
                 disabled={loading || !username.trim() || !password.trim()}
@@ -311,13 +291,12 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Server status note */}
             <div className="bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3">
               <p className="text-[10px] text-white/30 font-medium uppercase tracking-wider mb-1">
-                Backend required
+                Backend Status
               </p>
               <p className="text-[11px] text-white/25 leading-relaxed">
-                Make sure the FastAPI server is running on <span className="font-mono text-white/40">localhost:8000</span> and your PostgreSQL database is connected.
+                Connected to RAID-SecOps backend on <span className="font-mono text-white/40">Render</span>.
               </p>
             </div>
           </>
