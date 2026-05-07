@@ -4,7 +4,7 @@
  * Swap API_BASE in .env when deploying to production.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_URL ?? 'https://raid-secops-backend.onrender.com'
 
 // ── Auth header helper ────────────────────────────────────────
 function authHeaders(): HeadersInit {
