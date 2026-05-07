@@ -9,3 +9,8 @@ python-multipart
 pydantic
 pydantic-settings
 greenlet
+numpy
+scikit-learn
+pandas
+joblib
+requests
